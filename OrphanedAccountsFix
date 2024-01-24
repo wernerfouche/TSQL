@@ -1,0 +1,153 @@
+-- First, make sure that this is the problem. This will lists the orphaned users:
+
+Use [Database] 
+Go; 
+
+EXEC sp_change_users_login 'Report' 
+
+If you already have a login id and password for this user, fix it by doing: 
+
+EXEC sp_change_users_login 'Auto_Fix', 'user' 
+
+If you want to create a new login id and password for this user, fix it by doing: 
+
+EXEC sp_change_users_login 'Auto_Fix', 'user', 'login', 'password' 
+
+In future versions the above functionality will be deprecated, use: 
+
+ALTER USER [<DB_user>] 
+WITH LOGIN = [<login_user>]; 
+GO 
+
+-- Below script will find orphaned accounts for the whole instance rather than having to query each database as above:
+
+  
+
+set nocount on 
+ 
+DECLARE @Results table (DBName varchar(50), UserName varchar(50), UserSid varbinary(85)) 
+ 
+DECLARE @dbname varchar(255) 
+ 
+DECLARE db_loop CURSOR 
+ 
+READ_ONLY FOR 
+ 
+Select [name] from master.sys.databases 
+where [name] not in ('tempdb') and state = 0 
+ 
+OPEN db_loop 
+ 
+FETCH NEXT FROM db_loop INTO @dbname 
+ 
+WHILE (@@fetch_status <> -1) 
+ 
+BEGIN 
+ 
+insert into @Results (Username, UserSid) 
+ 
+EXEC ('EXEC [' + @dbname + '].dbo.sp_change_users_login @Action=Report') 
+ 
+UPDATE @Results set DBName = @dbname where DBName is null 
+ 
+FETCH NEXT FROM db_loop INTO @dbname 
+ 
+END 
+ 
+CLOSE db_loop 
+ 
+DEALLOCATE db_loop 
+ 
+select DBName, UserName, UserSid 
+from @Results   
+
+-- Add this script to the bottom of the above script to fix all orphaned users on the instance.
+
+DECLARE @UserName varchar(255) 
+ 
+DECLARE db_results CURSOR 
+READ_ONLY FOR 
+Select [DBName], [UserName] from @Results 
+ 
+OPEN db_results 
+ 
+FETCH NEXT FROM db_results INTO @dbname, @UserName 
+ 
+WHILE (@@fetch_status <> -1) 
+BEGIN 
+ 
+Print '[' + @dbname + '].dbo.sp_change_users_login ''Auto_Fix'', ''' + @UserName +'''' 
+EXEC ('EXEC [' + @dbname + '].dbo.sp_change_users_login ''Auto_Fix'', ''' + @UserName +'''') 
+ 
+ 
+FETCH NEXT FROM db_results INTO @dbname, @UserName 
+ 
+END 
+ 
+CLOSE db_results 
+ 
+DEALLOCATE db_results 
+
+
+-- Orphaned logins fix all on DB:
+
+  
+
+-- change Database name and default password ~ if you don't want it to create new Logins comment out items in Yellow 
+ 
+ 
+
+SET NOCOUNT ON 
+USE fms_IAA 
+GO 
+DECLARE @loop INT 
+DECLARE @USER sysname 
+DECLARE @sqlcmd NVARCHAR(500) = '' 
+
+  
+
+IF OBJECT_ID('tempdb..#Orphaned') IS NOT NULL  
+BEGIN 
+  DROP TABLE #orphaned 
+END 
+ 
+CREATE TABLE #Orphaned (UserName sysname,IDENT INT IDENTITY(1,1)) 
+ 
+INSERT INTO #Orphaned (UserName) 
+SELECT [name] FROM sys.database_principals WHERE [type] IN ('U','S') AND is_fixed_role = 0 AND [Name] NOT IN ('dbo','guest','sys','INFORMATION_SCHEMA') 
+
+  
+
+IF(SELECT COUNT(*) FROM #Orphaned) > 0 
+BEGIN 
+SET @loop = 1 
+WHILE @loop <= (SELECT MAX(IDENT) FROM #Orphaned) 
+  BEGIN 
+    SET @USER = (SELECT UserName FROM #Orphaned WHERE IDENT = @loop) 
+    IF(SELECT COUNT(*) FROM sys.server_principals WHERE [Name] = @USER) <= 0 
+     BEGIN 
+        IF EXISTS(SELECT 1 FROM sys.database_principals WHERE [Name] = @USER AND
+type_desc = 'WINDOWS_USER') 
+         BEGIN 
+            SET @sqlcmd = 'CREATE LOGIN [' + @USER + '] FROM WINDOWS' 
+           Exec(@sqlcmd) 
+            PRINT @sqlcmd 
+         END 
+        IF EXISTS(SELECT 1 FROM sys.database_principals WHERE [Name] = @USER AND type_desc = 'SQL_USER') 
+         BEGIN 
+            SET @sqlcmd = 'CREATE LOGIN [' + @USER + '] WITH PASSWORD = N''password''' 
+           Exec(@sqlcmd) 
+            PRINT @sqlcmd 
+         END 
+     END 
+      
+    SET @sqlcmd = 'ALTER USER [' + @USER + '] WITH LOGIN = [' + @USER + ']' 
+    Exec(@sqlcmd) 
+    PRINT @USER + ' link to DB user reset'; 
+    SET @loop = @loop + 1 
+  END 
+END 
+SET NOCOUNT OFF 
+
+ 
+ 
