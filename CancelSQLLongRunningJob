@@ -1,0 +1,13 @@
+DECLARE @Duration_secs INT;
+
+SELECT @Duration_secs = DATEDIFF(ss, ja.start_execution_date, GETDATE())
+FROM   msdb.dbo.sysjobs jobs
+       LEFT JOIN msdb.dbo.sysjobactivity ja ON ja.job_id = jobs.job_id
+            AND ja.start_execution_date IS NOT NULL
+WHERE  jobs.name = '#Insert SQL Job Name Here#'
+       AND stop_execution_date IS NULL;
+
+IF @Duration_secs > 43200 -- 12 hours
+    BEGIN
+        EXEC dbo.sp_stop_job N'#Insert SQL Job Name Here#';
+    END;
