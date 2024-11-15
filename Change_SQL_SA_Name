@@ -1,0 +1,4 @@
+/* Update your SQL SA login with a a new name for security and best practise */
+
+USE Master;
+ALTER LOGIN [sa] WITH NAME = [#NewName#]
