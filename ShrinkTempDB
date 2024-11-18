@@ -1,0 +1,32 @@
+/* Stop any active SQL Agent jobs before running the below script 
+
+Remember to adjust the values for the tempdb files accordingly, as not all instances have same tempd file configurations. 
+
+It can take a long time to complete, if the tempdb is large. 
+
+If the below script doesn’t work, failover the active node in the AG group to the secondary, and then restart the sql engine on the node just been failed over. */
+
+ 
+
+# Remember to adjust the values for the tempdb files accordingly, as not all instances have same tempdb configs, this can be found under: 
+system database - tempdb -properties -files# 
+
+  
+
+use tempdb 
+GO 
+SELECT name, size 
+FROM sys.master_files 
+WHERE database_id = DB_ID(N'tempdb'); 
+GO 
+DBCC FREEPROCCACHE 
+DBCC DROPCLEANBUFFERS 
+DBCC FREESYSTEMCACHE ('ALL') 
+DBCC FREESESSIONCACHE 
+DBCC SHRINKDATABASE(tempdb, 10); 
+dbcc shrinkfile ('tempdev') 
+dbcc shrinkfile ('temp2') 
+dbcc shrinkfile ('temp3') 
+dbcc shrinkfile ('temp4') 
+dbcc shrinkfile ('templog') 
+GO 
