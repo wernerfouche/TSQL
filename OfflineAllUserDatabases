@@ -1,0 +1,5 @@
+/* TSQL script to offline all user databases */
+
+SELECT 'ALTER DATABASE ['+name+'] SET OFFLINE WITH NO_WAIT'+CHAR(10) FROM 
+MASTER.sys.databases
+WHERE name NOT IN ('master','tempdb','model','msdb','distribution')
