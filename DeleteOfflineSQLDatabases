@@ -1,6 +1,6 @@
-/*When you use the SQL Server DROP DATABASE command for an offline database it only removes the database records from the SQL Server system tables, but does not remove the actual data and log files from the file system. In this tip we look at a simple and fast tool to drop all of the offline databases from your SQL Server and also delete the MDF, NDF and LDF files of these databases from their respective locations in the file system.*/
+-- When you use the SQL Server DROP DATABASE command for an offline database it only removes the database records from the SQL Server system tables, but does not remove the actual data and log files from the file system. In this tip we look at a simple and fast tool to drop all of the offline databases from your SQL Server and also delete the MDF, NDF and LDF files of these databases from their respective locations in the file system.
 
-/*First we need to enable the 'Ole Automation Procedures' configuration option on your server, which can be done as follows:*/
+-- First we need to enable the 'Ole Automation Procedures' configuration option on your server, which can be done as follows
 
 EXEC sp_configure 'show advanced options', 1
 GO
@@ -11,7 +11,7 @@ GO
 RECONFIGURE
 GO
 
-/*Here is the actual stored procedure to remove the databases.*/
+-- Here is the actual stored procedure to remove the databases.
 
 use master
 go
@@ -84,7 +84,7 @@ BEGIN
 END
 GO
 
-/*Using the Stored Procedure to Remove Offline Databases and File*/
+-- Using the Stored Procedure to Remove Offline Databases and File
 
 use master
 go
