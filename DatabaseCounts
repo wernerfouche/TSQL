@@ -1,3 +1,3 @@
-/* Use this script if want to not show offline databases, and only user databases counts */ 
+-- Use this script if want to not show offline databases, and only user databases counts
  
 select count(*) from sys.databases where state_desc='ONLINE' and database_id > 4 and upper(name) not like '#DatabaseNameHere#%'
