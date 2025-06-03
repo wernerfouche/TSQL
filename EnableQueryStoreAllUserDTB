@@ -1,4 +1,4 @@
-/* To enable query store on all the user databases on a SQL instance, run the following script, then copy the output values and run it again, it will enable query store on all the user databases on the required SQL instance, with the default paramaters recommended by MS */
+-- To enable query store on all the user databases on a SQL instance, run the following script, then copy the output values and run it again, it will enable query store on all the user databases on the required SQL instance, with the default paramaters recommended by MS
 
   SELECT 'ALTER DATABASE '
     +QUOTENAME(name)+ 
