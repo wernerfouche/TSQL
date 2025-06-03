@@ -1,6 +1,6 @@
-## The following scripts will assist with finding out the SQL backup history and completion times of existing SQL backups
+-- The following scripts will assist with finding out the SQL backup history and completion times of existing SQL backups
 
-## The first script is to find out the backup history for all databases on the SQL Instance
+-- The first script is to find out the backup history for all databases on the SQL Instance
 
 SELECT   
 
@@ -29,7 +29,7 @@ ORDER BY
 
 ===============================================================================================================
 
- ## This script showcases the backup completion time for existing SQL running jobs
+ -- This script showcases the backup completion time for existing SQL running jobs
 
 /*==================================================================Script: Monitor Backup Restore Dbcc.sql 
 Description: This script will display estimated completion times 
