@@ -1,4 +1,7 @@
--- Find last time of update on a table
+-- Find last time of update on a table, just update the database name below
+
+USE "Database_name";
+GO
 
 SELECT
 tbl.name
