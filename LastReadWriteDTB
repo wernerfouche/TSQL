@@ -1,6 +1,6 @@
--- This will give you the details about when was the last read/write performed on a specific SQL database:
+-- This will give you the details about when was the last read/write performed on a specific SQL database, just update the database name in the script
 
-USE server_name;
+USE "Database_name";
 GO
 
 SET ANSI_WARNINGS OFF;
