@@ -1,0 +1,70 @@
+
+Efficient SQL Server Patching Using DBATools.IO
+By bradyupton in Maintenance, Security
+ October 15, 2024
+
+Maintaining SQL Server infrastructure can be time-consuming, especially when it comes to patching multiple servers. A manual approach of remoting into each server individually, checking versions, and applying updates takes significant effort and is prone to errors. This is where DBATools.IO, a powerful open-source PowerShell module, comes in handy. It simplifies and automates SQL Server tasks, including patching. In this post, we’ll walk through a PowerShell script that uses DBATools.IO to patch SQL Servers, saving time and effort compared to manual methods.
+
+What is DBATools.IO?
+DBATools.IO is a collection of PowerShell cmdlets designed to make SQL Server management easier for DBAs. It provides over 500 functions for database migration, backups, performance tuning, patching, and more. For those managing multiple SQL Servers, DBATools.IO is an essential tool in automating repetitive tasks, improving efficiency, and reducing human error.
+
+Breaking Down the PowerShell Script
+Let’s look at each part of the script and understand what it’s doing:
+
+Set-ExecutionPolicy RemoteSigned
+This line allows PowerShell scripts to run on your machine. The RemoteSigned policy permits scripts downloaded from the internet to run if they are signed by a trusted publisher, while local scripts don’t need a signature.
+
+#Servers
+$ServerList = 'Server01', 'Server02', 'Server03'
+Here, a list of SQL Servers that need to be patched is specified. Instead of remoting into each server one by one, this list tells the script which servers it needs to patch, simplifying the process.
+
+$Credential = Get-Credential -UserName .\Brady -Message 'Enter Password'
+The Get-Credential cmdlet prompts you to enter your credentials (username and password), which will be securely passed into the subsequent commands. This allows the script to authenticate when accessing the SQL Servers without exposing passwords directly in the script.
+
+import-module DBATools
+import-module sqlserver
+These commands import the necessary modules. DBATools provides SQL Server management functions, while sqlserver allows interaction with SQL Server instances via PowerShell.
+
+Test-DbaBuild -Latest -Update
+This command updates the local index of SQL Server builds to ensure you are working with the most up-to-date version information. It checks for the latest SQL Server cumulative updates and stores that information locally for reference. Read more about this command and available parameters here.
+
+$version = '2022CU15'
+Here, the desired SQL Server version is set, in this case, 2022CU15. This variable is used later to specify which version to patch the servers to.
+
+Get-DbaBuildReference -Update
+This command updates the build reference for SQL Server patches, ensuring the script uses the most current information available for the version you’re updating to. Read more about this command and available parameters here.
+
+Update-DbaInstance -ComputerName $ServerList -Version $version -Path '\\fileshare\DBA\SQL Server Installs\Patches\2022' -Credential $Credential -Restart
+This is the heart of the script: the actual patching process. The Update-DbaInstance cmdlet performs the following tasks:
+
+-ComputerName $ServerList: Specifies the servers to patch (as listed in $ServerList).
+-Version $version: Defines the SQL Server version to patch to, which was previously set as 2022CU15.
+-Path: Specifies the network path where the patch files are located, in this case, a fileshare (\\fileshare\DBA\SQL Server Installs\Patches\2022).
+-Credential $Credential: Provides the credentials (username/password) to access and update the servers.
+-Restart: Ensures that the servers are automatically restarted after the patch is applied, as needed.
+
+#=============================================
+
+Final look at the entire script:
+Set-ExecutionPolicy RemoteSigned
+
+#Servers
+$ServerList = 'Server01', 'Server02', 'Server03'
+
+#Credential to pass into the Update-DbaInstance command
+$Credential = Get-Credential -UserName .\Brady -Message 'Enter Password'
+
+import-module DBATools
+import-module sqlserver
+
+#Update the index of Builds
+Test-DbaBuild -Latest -Update
+
+#Set the version that you want to update to
+$version = '2022CU15'
+
+# Update the build index
+Get-DbaBuildReference -Update
+
+# Patch SQL Server
+Update-DbaInstance -ComputerName $ServerList -Version $version -Path '\\fileshare\DBA\SQL Server Installs\Patches\2022' -Credential $Credential -Restart
