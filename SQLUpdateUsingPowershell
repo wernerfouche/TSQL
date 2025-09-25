@@ -1,0 +1,5 @@
+## Run the following scripts using an admin powershell session, update the values of the security update names before running the script
+
+Start-Process -FilePath "C:\temp\SQLServer####-KB######-x64.exe" -ArgumentList "/quiet /IAcceptSQLServerLicenseTerms /Action=Patch /AllInstances" -Wait -NoNewWindow
+
+## On completion open SQL SSMS and connect to the patched server, run @@sqlversion in TSQL and verify it's the updated the version, if not updated, something went wrong, go through the logs (Logs located here (C:\Program Files\Microsoft SQL Server\###\Setup Bootstrap\Log\Summary.txt)
