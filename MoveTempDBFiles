@@ -1,0 +1,16 @@
+-- Run this TSQL against tempdb database first to get current configruations 
+
+SELECT 'ALTER DATABASE tempdb MODIFY FILE (NAME = [' + f.name + '],'
+	+ ' FILENAME = ''Z:\MSSQL\DATA\' + f.name
+	+ CASE WHEN f.type = 1 THEN '.ldf' ELSE '.mdf' END
+	+ ''');'
+FROM sys.master_files f
+WHERE f.database_id = DB_ID(N'tempdb');
+
+-- Now with the output from the above TSQL statement modify it with the new location, and run against the tempdb database ex:
+
+ALTER DATABASE tempdb 
+MODIFY FILE (NAME = tempdev, FILENAME = 'E:\SQLData\tempdb.mdf');
+GO
+
+-- For this to take affect, restart SQL engine services
