@@ -1,0 +1,39 @@
+-- This script will showcase complete SQL AG (high availability) health status and info
+
+SELECT srv.replica_server_name, ARS.role_desc, db_name(DRS.database_id) as DatabaseName,
+
+grp.name AG_NAme, DRS.synchronization_state_desc, DRS.synchronization_health_desc ,
+ars.is_local, lstn.dns_name, lstn.ip_configuration_string_from_cluster
+
+FROM sys.dm_hadr_database_replica_states DRS
+
+INNER JOIN sys.dm_hadr_availability_replica_states ARS
+
+ON DRS.group_id = ARS.group_id AND DRS.replica_id = ARS.replica_id
+
+INNER JOIN sys.availability_groups grp
+
+ON ARS.group_id = grp.group_id
+
+INNER JOIN sys.availability_replicas srv
+
+ON ARS.group_id = srv.group_id AND ARS.replica_id = srv.replica_id
+
+INNER JOIN sys.availability_group_listeners lstn
+
+ON grp.group_id = lstn.group_id
+
+WHERE EXISTS  (     
+
+                  SELECT 1
+
+                  FROM sys.dm_hadr_availability_replica_states innerArs
+
+                  WHERE InnerArs.group_id = ARS.group_id
+
+                  AND InnerArs.role = 1
+
+              )
+
+ORDER BY AG_Name, DatabaseName, role_desc
+
