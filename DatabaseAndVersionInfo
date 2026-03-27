@@ -1,0 +1,7 @@
+-- 1. Show SQL Server version information
+-- 2. Show only user databases
+-- IDs 1-4 are reserved for system databases: master, tempdb, model, and msdb
+
+SELECT name AS 'Database Name', @@VERSION AS 'SQL and OS Version'
+FROM sys.databases
+WHERE database_id > 4;
