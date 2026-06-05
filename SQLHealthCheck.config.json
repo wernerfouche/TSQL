@@ -1,0 +1,29 @@
+{
+  "SqlServers": [
+    "SQL01",
+    "SQL02\\INST1",
+    "SQL03"
+  ],
+
+  "Thresholds": {
+    "CriticalDiskPct": 10,
+    "WarnDiskPct": 20,
+    "FullBackupMaxHours": 24,
+    "LogBackupMaxHours": 4,
+    "FailedJobLookbackHrs": 24
+  },
+
+  "Email": {
+    "SendEmail": true,
+    "SmtpServer": "smtp.contoso.com",
+    "SmtpPort": 25,
+    "SmtpUseSsl": false,
+    "MailFrom": "sqlalerts@contoso.com",
+    "MailTo": [
+      "dba-team@contoso.com",
+      "oncall@contoso.com"
+    ]
+  },
+
+  "OutputFolder": "C:\\Scripts\\Reports"
+}
